@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>磁粒檢測實作訓練教材（初級）─ 完整七單元</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--pri:#1b4965;--acc:#2e86ab;--bg:#f5f7fa;--side:290px;--red:#c0392b;--grn:#27ae60;--org:#e67e22;--purp:#8e44ad;--card:#fff;--txt:#2c3e50;--ltxt:#7f8c8d}
+body{font-family:'Microsoft JhengHei','Noto Sans TC',sans-serif;background:var(--bg);color:var(--txt);line-height:1.85;display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sb{width:var(--side);background:linear-gradient(180deg,#1b4965 0%,#0d2b3e 100%);color:#fff;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;transition:transform .3s}
+.sb::-webkit-scrollbar{width:5px}
+.sb::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
+.sb-hdr{padding:18px 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.15)}
+.sb-hdr h2{font-size:16px;letter-spacing:1px}
+.sb-hdr small{display:block;font-size:11px;color:rgba(255,255,255,.55);margin-top:4px}
+.sb-hdr .badge{display:inline-block;background:var(--org);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:6px}
+.nav{list-style:none;padding:6px 0}
+.nav li a{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;transition:.2s;border-left:3px solid transparent}
+.nav li a:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav li a.act{background:rgba(255,255,255,.12);color:#fff;border-left-color:var(--org)}
+.nav .ic{font-size:17px;flex-shrink:0;width:22px;text-align:center;margin-top:1px}
+.nav .tm{display:block;font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+.prog{margin:14px 16px;background:rgba(255,255,255,.12);border-radius:8px;height:7px;overflow:hidden}
+.prog-fill{height:100%;background:var(--org);border-radius:8px;transition:width .5s;width:0}
+.prog-txt{text-align:center;font-size:10px;color:rgba(255,255,255,.5);margin-bottom:10px}
+
+/* Toggle */
+.sb-tog{display:none;position:fixed;top:10px;left:10px;z-index:200;background:var(--pri);color:#fff;border:none;border-radius:8px;width:42px;height:42px;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+
+/* ── Main ── */
+.mn{margin-left:var(--side);flex:1;padding:28px 38px 60px;max-width:980px}
+.sec{display:none;animation:fadeIn .35s}.sec.act{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+h1{font-size:24px;color:var(--pri);margin-bottom:4px}
+h1 small{font-size:13px;color:var(--ltxt);font-weight:normal}
+h3{font-size:18px;color:var(--pri);margin:26px 0 12px;padding-bottom:7px;border-bottom:2px solid var(--acc);display:flex;align-items:center;gap:7px}
+h4{font-size:15px;color:var(--acc);margin:16px 0 8px}
+p{margin:7px 0}
+
+/* Cards */
+.cd{background:var(--card);border-radius:11px;padding:20px 24px;margin:14px 0;box-shadow:0 2px 10px rgba(0,0,0,.05);border-left:4px solid var(--acc)}
+.cd.w{border-left-color:var(--red);background:#fef5f5}
+.cd.g{border-left-color:var(--grn);background:#f0faf4}
+.cd.o{border-left-color:var(--org);background:#fffbf0}
+.cd.p{border-left-color:var(--purp);background:#faf5ff}
+.cd-t{font-weight:bold;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+
+/* Steps */
+.st{counter-reset:s;list-style:none;padding:0}
+.st li{counter-increment:s;padding:11px 14px 11px 52px;position:relative;margin:5px 0;background:var(--card);border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.st li::before{content:counter(s);position:absolute;left:10px;top:11px;width:30px;height:30px;background:var(--acc);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:12px 0;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.05)}
+th{background:var(--pri);color:#fff;padding:9px 12px;font-size:13px;text-align:left}
+td{padding:9px 12px;border-bottom:1px solid #eee;font-size:13px}
+tr:hover td{background:#f0f6fb}
+
+/* Tags */
+.tg{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:bold;margin:1px}
+.tg-d{background:#ffeaa7;color:#856404}.tg-w{background:#81ecec;color:#0c5460}.tg-f{background:#a29bfe;color:#fff}.tg-v{background:#fab1a0;color:#721c24}
+
+/* Formula */
+.fm{background:#eef2f7;border:1px solid #d0d8e2;border-radius:8px;padding:12px 18px;margin:10px 0;font-family:'Courier New',monospace;font-size:14px;text-align:center;color:var(--pri)}
+
+/* Diagram */
+.dg{text-align:center;margin:14px 0;padding:14px;background:#fff;border-radius:9px;border:1px solid #e6eaf0}
+.dg svg{max-width:100%}
+.dg-cap{font-size:11px;color:var(--ltxt);margin-top:6px}
+
+/* Nav buttons */
+.nb{display:flex;justify-content:space-between;margin-top:36px;padding-top:18px;border-top:1px solid #e6eaf0}
+.btn{padding:9px 22px;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-family:inherit;transition:.2s}
+.btn.prev{background:#e6eaf0;color:var(--txt)}.btn.next{background:var(--acc);color:#fff}
+.btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.btn:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none}
+
+/* KV pairs */
+.kv{display:flex;gap:8px;padding:3px 0;flex-wrap:wrap}.kv .k{font-weight:bold;color:var(--pri);min-width:90px}.kv .v{flex:1}
+
+/* Compare grid */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+@media(max-width:700px){.cmp{grid-template-columns:1fr}}
+
+/* Responsive */
+@media(max-width:820px){
+  .sb{transform:translateX(-100%)}.sb.open{transform:translateX(0)}
+  .sb-tog{display:block}.mn{margin-left:0;padding:18px 14px 60px}
+  :root{--side:265px}
+}
+@media print{.sb,.sb-tog,.nb{display:none!important}.mn{margin:0;max-width:100%}.sec{display:block!important;page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<button class="sb-tog" onclick="document.querySelector('.sb').classList.toggle('open')">☰</button>
+
+<nav class="sb">
+  <div class="sb-hdr">
+    <h2>磁粒檢測實作訓練教材</h2>
+    <small>初級 ─ 財團法人台灣非破壞檢測協會</small>
+    <div class="badge">總時數 8 小時 ・ 7 單元</div>
+  </div>
+  <div class="prog"><div class="prog-fill" id="pf"></div></div>
+  <div class="prog-txt" id="pt">進度 0 / 8</div>
+  <ul class="nav" id="nv">
+    <li><a href="#" data-s="0" class="act"><span class="ic">📖</span><div>課程總覽<span class="tm">目錄</span></div></a></li>
+    <li><a href="#" data-s="1"><span class="ic">🔬</span><div>單元一：磁粒檢測前準備<span class="tm">1 小時</span></div></a></li>
+    <li><a href="#" data-s="2"><span class="ic">🧲</span><div>單元二：色比乾式磁軛法<span class="tm">1 小時</span></div></a></li>
+    <li><a href="#" data-s="3"><span class="ic">🌊</span><div>單元三：色比濕式磁圈法<span class="tm">1.5 小時</span></div></a></li>
+    <li><a href="#" data-s="4"><span class="ic">💡</span><div>單元四：螢光濕式磁軛法<span class="tm">1 小時</span></div></a></li>
+    <li><a href="#" data-s="5"><span class="ic">⚡</span><div>單元五：螢光濕式磁圈法<span class="tm">1.5 小時</span></div></a></li>
+    <li><a href="#" data-s="6"><span class="ic">🔩</span><div>單元六：螢光濕式中心導體法<span class="tm">1 小時</span></div></a></li>
+    <li><a href="#" data-s="7"><span class="ic">⚙️</span><div>單元七：色比乾式接觸棒法<span class="tm">1 小時</span></div></a></li>
+  </ul>
+</nav>
+
+<main class="mn">
+
+<!-- ========== 0. 課程總覽 ========== -->
+<div class="sec act" id="s0">
+<h1>磁粒檢測實作訓練教材（初級）<small>Magnetic Particle Testing ─ Level I Practical Training</small></h1>
+
+<div class="cd o">
+  <div class="cd-t">📌 教材說明</div>
+  <p>本教材依據<strong>財團法人台灣非破壞檢測協會</strong>「1100201 初級磁粒實作教材」原始單元順序編排，涵蓋 7 大單元、總時數 8 小時，從檢測前準備到各種磁化方法的完整實作訓練。</p>
+</div>
+
+<h3>📋 課程架構</h3>
+<table>
+  <tr><th>單元</th><th>主題</th><th>磁粒類型</th><th>磁化方法</th><th>時數</th></tr>
+  <tr><td>一</td><td>磁粒檢測前準備</td><td>乾/濕/螢光</td><td>─</td><td>1 hr</td></tr>
+  <tr><td>二</td><td>色比乾式磁軛法 (Yoke)</td><td><span class="tg tg-d">乾式</span><span class="tg tg-v">色比</span></td><td>磁軛・縱向磁化</td><td>1 hr</td></tr>
+  <tr><td>三</td><td>色比濕式磁圈法 (Coil)</td><td><span class="tg tg-w">濕式</span><span class="tg tg-v">色比</span></td><td>線圈・縱向磁化</td><td>1.5 hr</td></tr>
+  <tr><td>四</td><td>螢光濕式磁軛法 (Yoke)</td><td><span class="tg tg-w">濕式</span><span class="tg tg-f">螢光</span></td><td>磁軛・縱向磁化</td><td>1 hr</td></tr>
+  <tr><td>五</td><td>螢光濕式磁圈法 (Coil)</td><td><span class="tg tg-w">濕式</span><span class="tg tg-f">螢光</span></td><td>線圈・縱向磁化</td><td>1.5 hr</td></tr>
+  <tr><td>六</td><td>螢光濕式中心導體法</td><td><span class="tg tg-w">濕式</span><span class="tg tg-f">螢光</span></td><td>中心導體・周向磁化</td><td>1 hr</td></tr>
+  <tr><td>七</td><td>色比乾式接觸棒法</td><td><span class="tg tg-d">乾式</span><span class="tg tg-v">色比</span></td><td>接觸棒・周向磁化</td><td>1 hr</td></tr>
+</table>
+
+<h3>📖 引用規範</h3>
+<div class="cd">
+  <div class="kv"><span class="k">CNS 11048</span><span class="v">磁粒檢測法通則</span></div>
+  <div class="kv"><span class="k">CNS 11377</span><span class="v">鑄件及鍛件磁粒檢測法</span></div>
+  <div class="kv"><span class="k">CNS 11378</span><span class="v">銲道磁粒檢測法</span></div>
+</div>
+
+<h3>🔀 七單元的差異比較</h3>
+<table>
+  <tr><th>比較項目</th><th>單元二/三/七（色比）</th><th>單元四/五/六（螢光）</th></tr>
+  <tr><td>觀察環境</td><td>白光下（≥ 500 lx）</td><td>暗室＋黑光燈（背景 ≤ 20 lx）</td></tr>
+  <tr><td>磁粒發光</td><td>靠顏色對比（紅/黑/灰）</td><td>UV-A 激發螢光</td></tr>
+  <tr><td>靈敏度</td><td>較低</td><td>較高（更容易發現微小瑕疵）</td></tr>
+  <tr><td>溫度限制</td><td>乾式 ≤ 315°C；濕式 ≤ 57°C</td><td>≤ 57°C</td></tr>
+</table>
+
+<div class="nb">
+  <button class="btn prev" disabled>←</button>
+  <button class="btn next" onclick="go(1)">開始 → 單元一</button>
+</div>
+</div>
+
+<!-- ========== 1. 磁粒檢測前準備 ========== -->
+<div class="sec" id="s1">
+<h1>單元一：磁粒檢測前準備<small>⏱️ 1 小時 ｜ 引用 CNS 11048</small></h1>
+
+<div class="cd">
+  <div class="cd-t">🎯 目的</div>
+  <p>學習如何依據 CNS 11048 標準或程序書中所述的磁性介質之調配及調整濃度（油、水），核對白光強度與核對黑光強度等之方法和步驟。</p>
+</div>
+
+<h3>🧪 一、磁粒之型式與規定</h3>
+<table>
+  <tr><th>磁粒種類</th><th>特性</th><th>溫度限制</th></tr>
+  <tr><td><span class="tg tg-d">乾式磁粒</span></td><td>粉末狀，顏色須與檢測面有適當對比</td><td>表面溫度 ≤ 315°C 才可使用</td></tr>
+  <tr><td><span class="tg tg-w">濕式磁粒</span><span class="tg tg-v">色比</span></td><td>懸浮於液體中，需加潤濕劑與防銹劑</td><td>表面溫度 ≤ 57°C</td></tr>
+  <tr><td><span class="tg tg-w">濕式磁粒</span><span class="tg tg-f">螢光</span></td><td>在黑光燈(UV-A)照射下發出螢光</td><td>表面溫度 ≤ 57°C</td></tr>
+</table>
+
+<h3>📏 二、磁浴濃度測試（沉澱管法）</h3>
+<ol class="st">
+  <li>徹底<strong>攪拌</strong>使磁粒均勻懸浮於液體中。</li>
+  <li>取 <strong>100 cc</strong> 攪拌過的磁浴灌入<strong>梨形沉澱管</strong>中。</li>
+  <li>如磁粒因剩磁聚集在一起，先施以<strong>退磁</strong>。</li>
+  <li>靜置等候沉澱：<strong>螢光磁粒 60 分鐘</strong>、<strong>色比磁粒 30 分鐘</strong>。</li>
+  <li>記錄管底<strong>磁粒沉澱的容積</strong>。</li>
+  <li>必要時添加磁粒或液體並重複上述步驟。</li>
+  <li>校正結果記錄於<strong>表 1（磁浴濃度、校正/查核記錄表）</strong>。</li>
+</ol>
+
+<div class="cd o">
+  <div class="cd-t">📊 合格濃度標準</div>
+  <table>
+    <tr><th>磁粒類型</th><th>沉澱磁粒容積（100cc 磁浴）</th></tr>
+    <tr><td>螢光磁粒</td><td><strong>0.1 ~ 0.4 cc</strong></td></tr>
+    <tr><td>色比磁粒</td><td><strong>1.2 ~ 2.4 cc</strong></td></tr>
+  </table>
+  <p style="margin-top:8px">若不符標準，必須<strong>重新調製磁浴</strong>。</p>
+</div>
+
+<h3>💡 三、核對白光照度計</h3>
+<ol class="st">
+  <li>白光照度計<strong>每年校正一次</strong>，由原廠或具有追溯效力之機構校正。</li>
+  <li>以不同照度進行比對校正：亮度範圍自 <strong>10 至 40 lx</strong>（每 10 lx 一階），及自 <strong>300 至 700 lx</strong>（每 10 lx 一階）。</li>
+  <li>受校之白光照度計與已經原廠校正合格之照度計，其讀值差異<strong>不得超過 ±10%</strong>。</li>
+  <li>校正結果記錄於<strong>表 2（白光照度計/黑光強度計比對校正記錄表）</strong>。</li>
+</ol>
+
+<h3>🔦 四、核對黑光燈強度計 (J221)</h3>
+<ol class="st">
+  <li>黑光燈強度計 (J221) <strong>每年校正一次</strong>，由原廠或具追溯效力之機構校正。</li>
+  <li>受校正之黑光燈照度計強度範圍為自 <strong>600 至 1,400 μW/cm²</strong>，每間隔 200 μW/cm²（±20%）一階。</li>
+  <li>受校之黑光強度計與已經原廠校正合格之強度計，其讀值差異<strong>不得超過 ±10%</strong>。</li>
+  <li>校正結果記錄於<strong>表 2</strong>。</li>
+</ol>
+
+<h3>⚫ 五、黑光燈強度校正</h3>
+<ol class="st">
+  <li>黑光燈校正使用 <strong>J221 meter</strong>，選擇鈕置於 <strong>A 位置</strong>（12,000 μW/cm²）。</li>
+  <li>使用輔助校正鐵架將黑光燈置於離 J221 meter <strong>380 mm</strong> 之位置。</li>
+  <li>打開黑光燈<strong>溫機 5 分鐘以上</strong>。</li>
+  <li>將照度計上<strong>濾光片取下</strong>，以黑光照射，記下此時強度值 <strong>X₁</strong>。</li>
+  <li>將照度計上<strong>濾光片裝上</strong>，以黑光照射，記下此時強度值 <strong>X₂</strong>。</li>
+  <li>計算 <strong>X₁ − X₂</strong> 是否大於 1,000 μW/cm²。</li>
+  <li>不合格之黑光燈必須<strong>更換燈泡或送修</strong>。</li>
+  <li>黑光強度超過 J221 A 值範圍時，將選擇鈕切至 <strong>B 位置</strong>。</li>
+</ol>
+
+<div class="fm">合格基準：X₁ − X₂ &gt; 1,000 μW/cm²</div>
+
+<div class="cd w">
+  <div class="cd-t">⚠️ 不合格處置</div>
+  <p>黑光燈校正不合格時，必須更換燈泡或送修，<strong>不得使用不合格之黑光燈進行螢光磁粒檢測</strong>。校正結果記錄於表 3（黑光燈校正記錄表）。</p>
+</div>
+
+<div class="nb">
+  <button class="btn prev" onclick="go(0)">← 總覽</button>
+  <button class="btn next" onclick="go(2)">單元二 →</button>
+</div>
+</div>
+
+<!-- ========== 2. 色比乾式磁軛法(Yoke) ========== -->
+<div class="sec" id="s2">
+<h1>單元二：色比乾式磁軛法 (Yoke) 檢測<small>⏱️ 1 小時 ｜ CNS 11377 / 11378 / 11048</small></h1>
+
+<div class="cd">
+  <div class="cd-t">🎯 目的</div>
+  <p>學習如何應用 CNS 11377、11378 或依據標準所做成之程序書，並根據<strong>色比乾式磁軛法</strong>以執行工件檢測。</p>
+</div>
+
+<h3>🔧 一、需用儀具與材料</h3>
+<table>
+  <tr><th>#</th><th>儀具/材料</th><th>說明</th></tr>
+  <tr><td>1</td><td>上磁裝置</td><td>交流、直流或永久磁鐵磁軛</td></tr>
+  <tr><td>2</td><td>乾式磁粒</td><td>Magnaflux No.8A(紅)、3A(黑)、1(灰)或同型</td></tr>
+  <tr><td>3</td><td>白色背景漆</td><td>Tiede 695.1、Magnaflux WCP</td></tr>
+  <tr><td>4</td><td>磁粒噴撒器</td><td>橡皮球</td></tr>
+  <tr><td>5</td><td>照度計</td><td>白光照度計</td></tr>
+  <tr><td>6</td><td>標準規塊</td><td>八角型磁場指示規塊</td></tr>
+  <tr><td>7</td><td>磁場強度計</td><td>高斯計</td></tr>
+  <tr><td>8</td><td>表面處理工具</td><td>砂布、鋼絲刷、手提砂輪機</td></tr>
+</table>
+
+<h3>✅ 二、上磁機必須查核</h3>
+<ol class="st">
+  <li><strong>測試磁軛吸舉力 (Lifting Power)</strong>。</li>
+  <li>交流磁軛須吸起 <strong>4.5 公斤</strong>之試片。</li>
+  <li>直流或永久磁軛須能吸起 <strong>18.1 公斤</strong>之試片。</li>
+</ol>
+
+<h3>🔍 三、檢測系統查核</h3>
+<ol class="st">
+  <li>每次檢測前、檢測後、更換工件或更換操作人員時，應使用<strong>八角型磁場指示規塊</strong>規驗證系統檢測功能。將磁場指示規塊上磁並施加磁粒，確定所有正確的磁場方向及強度。</li>
+  <li><strong>環境照度</strong>：使用白光照度計（如 Lx-101）查核，確認被檢物表面照度 <strong>≥ 500 lx</strong>（750 μW/cm²）。室外光線充足時可免做。照度不足之環境，必須有光源（電燈或手電筒）協助。</li>
+</ol>
+
+<h3>⚡ 四、檢測程序</h3>
+<h4>4.1 磁化方式</h4>
+<div class="cd">
+  <p>檢測面通常至少須有<strong>兩次分開的檢測</strong>，第二次檢測的上磁方向須<strong>大約垂直於第一次</strong>。對已知缺陷方向之檢測不受此限。所有檢測區之間須有<strong>足夠的重疊部份</strong>。</p>
+</div>
+
+<h4>4.2 磁化程序：連續法</h4>
+<div class="cd o">
+  <p>除非檢測高剩磁構件，一般採用<strong>連續法</strong>上磁 ─ 噴撒磁粉、吹除過多磁粉、檢視之全部過程均需<strong>導通電流</strong>。</p>
+</div>
+
+<h4>4.3 檢測步驟（7 步）</h4>
+<ol class="st">
+  <li><strong>表面清理</strong> ─ 清除油脂、鏽皮、銲渣等。</li>
+  <li>將<strong>電磁軛放在試件上</strong>。</li>
+  <li><strong>啟動電源</strong>，施加磁化電流，上磁。</li>
+  <li><strong>噴灑磁粒</strong>於試件受磁化部位的表面上。</li>
+  <li><strong>清除過量的磁粒</strong>（輕吹或輕拍）。</li>
+  <li><strong>白光下檢視</strong>。</li>
+  <li><strong>移至下一檢測位置</strong>，重複。旋轉 90° 進行第二方向。</li>
+</ol>
+
+<h3>👁️ 五、顯示評估</h3>
+<div class="cd">
+  <p>顯示評估時機為磁化並噴灑磁粒後<strong>立即檢視評估</strong>。須特別注意真實瑕疵顯示與錯誤顯示之分辨。</p>
+  <p>遇有可能會遮蓋瑕疵的寬大範圍磁粒聚集時，<strong>重新清潔與重新檢驗</strong>。</p>
+</div>
+
+<h3>📝 六、瑕疵記錄</h3>
+<table>
+  <tr><th>瑕疵類型</th><th>定義</th></tr>
+  <tr><td><strong>線形瑕疵顯示</strong></td><td>長度為寬度的 <strong>3 倍以上</strong></td></tr>
+  <tr><td><strong>圓形瑕疵顯示</strong></td><td>長度<strong>未滿寬度的 3 倍</strong></td></tr>
+  <tr><td><strong>群集形瑕疵顯示</strong></td><td>數個瑕疵分佈於特定區域內（2,500 mm² 矩形，長邊 ≤ 150mm）</td></tr>
+  <tr><td><strong>裂縫顯示</strong></td><td>確定為任何型式之裂縫</td></tr>
+</table>
+<p>瑕疵紀錄應注意清楚記錄瑕疵<strong>位置、尺度、數量及種類</strong>。</p>
+
+<h3>🔄 七、檢測後退磁處理</h3>
+<ol class="st">
+  <li>使用交流電磁軛時，先將電磁軛置於工件上磁區通電停留一段時間。</li>
+  <li>將電磁軛<strong>緩慢地移開</strong>工件一段距離後才關閉電源，利用交流磁場強度變化達到退磁效果。</li>
+  <li>小型工件可將工件迅速自通電的交流電磁軛中間通過退磁。</li>
+  <li>退磁後應以<strong>磁場強度計</strong>量測剩磁強度，確認是否超過客戶要求之合格基準。</li>
+</ol>
+
+<div class="nb">
+  <button class="btn prev" onclick="go(1)">← 單元一</button>
+  <button class="btn next" onclick="go(3)">單元三 →</button>
+</div>
+</div>
+
+<!-- ========== 3. 色比濕式磁圈法(Coil) ========== -->
+<div class="sec" id="s3">
+<h1>單元三：色比濕式磁圈法 (Coil) 檢測<small>⏱️ 1.5 小時 ｜ CNS 11377 / 11378 / 11048</small></h1>
+
+<div class="cd">
+  <div class="cd-t">🎯 目的</div>
+  <p>學習如何應用 CNS 11377、11378 或依據標準所做成之程序書，並根據<strong>色比濕式磁圈法</strong>以執行工件檢測。</p>
+</div>
+
+<h3>🔧 一、需用儀具與材料</h3>
+<table>
+  <tr><th>#</th><th>儀具</th><th>品牌/型號範例</th></tr>
+  <tr><td>1</td><td>上磁機</td><td>Tiede GWH 15、GWH 60</td></tr>
+  <tr><td>2</td><td>電磁線圈</td><td>Tiede D350、D200；Magnaflux L-10</td></tr>
+  <tr><td>3</td><td>濕式磁粒</td><td>+690.2（黑色磁粉液）、Magnaflux 7CF(黑)、9CM(紅)</td></tr>
+  <tr><td>4</td><td>白色背景漆</td><td>Tiede 695.1、Magnaflux WCP</td></tr>
+  <tr><td>5</td><td>照度計</td><td>白光照度計</td></tr>
+  <tr><td>6</td><td>標準規塊</td><td>八角型磁場指示規塊</td></tr>
+  <tr><td>7</td><td>磁場強度計</td><td>高斯計</td></tr>
+</table>
+
+<h3>⚡ 二、使用上磁機必須</h3>
+<ol class="st">
+  <li>將輸出電纜線串聯<strong>電流計</strong>（如 Magnaflux 電流計）。</li>
+  <li>校正電流值範圍：GWH 60 為 500～5,000 安培（每 500 安培一階），GWH 15 為 200～1,200 安培（每 200 安培一階）。</li>
+  <li>上磁機電流指示之量測值與基準值誤差<strong>不得大於 ±10%</strong>。</li>
+</ol>
+
+<h3>📐 三、磁場強度計算（NI 安匝值）</h3>
+<p>磁圈法的核心是依被檢物的<strong>長度(L)</strong>與<strong>直徑(D)</strong>之比（L/D）計算所需磁場強度。以電流安培乘以圈數(N)表示之，簡稱<strong>安匝(NI)</strong>。</p>
+
+<div class="cd o">
+  <div class="cd-t">📏 前提條件</div>
+  <p>L/D 比在 <strong>3～15</strong> 之間時，依下列公式計算。L/D &lt; 3 或 &gt; 15 時另有處理規定。被檢物長度不得大於 450mm，若 &gt; 450mm 則需分段檢查。非圓柱狀取<strong>橫截面之最大對角線長度</strong>為直徑。</p>
+</div>
+
+<h4>公式一覽（當線圈截面積為被檢物截面積 10 倍以上時）</h4>
+<table>
+  <tr><th>條件</th><th>公式</th><th>編號</th></tr>
+  <tr><td>被檢物靠近線圈內側</td><td class="fm" style="text-align:left;border:none;background:none;padding:0">NI = 45,000 / (L/D)　(±10%)</td><td>公式①</td></tr>
+  <tr><td>被檢物位於線圈中心</td><td class="fm" style="text-align:left;border:none;background:none;padding:0">NI = 1,690R / [(6L/D) − 5]　(±10%)</td><td>公式②</td></tr>
+  <tr><td>線圈截面積為被檢物 2～10 倍</td><td class="fm" style="text-align:left;border:none;background:none;padding:0">NI = (NI)₁(Y−2) + (10−Y)/8　(±10%)</td><td>公式③</td></tr>
+  <tr><td>線圈截面積為被檢物 2 倍以下</td><td class="fm" style="text-align:left;border:none;background:none;padding:0">NI = 35,000 / [(L/D) + 2]　(±10%)</td><td>公式④</td></tr>
+</table>
+
+<div class="cd">
+  <div class="cd-t">📝 中空被檢物的有效直徑</div>
+  <div class="fm">D<sub>eff</sub> = 2 √[(A<sub>t</sub> − A<sub>h</sub>) / π]　……公式⑤</div>
+  <p>其中 A<sub>t</sub> 為被檢物總截面積，A<sub>h</sub> 為中空部份之截面積。</p>
+</div>
+
+<div class="fm">磁化電流：安培（電流表讀值）= 安匝 / 圈數　(±10%)　……公式⑥</div>
+
+<h3>🔍 四、檢測系統查核</h3>
+<p>同單元二，包含：八角型規塊驗證、環境照度查核（≥ 500 lx）、磁浴濃度查核。</p>
+
+<h3>⚡ 五、檢測程序與步驟</h3>
+<p>磁化方式與步驟同單元二（兩次垂直方向、連續法），差異在於使用<strong>線圈</strong>包繞被檢物產生縱向磁場，且需計算 NI 值設定電流。</p>
+
+<h3>📝 六、顯示評估、瑕疵記錄、退磁處理</h3>
+<p>同單元二。退磁處理方法相同：使用大型上磁機時直接利用設備上的退磁功能鍵，交流電磁軛則緩慢移開退磁。</p>
+
+<div class="nb">
+  <button class="btn prev" onclick="go(2)">← 單元二</button>
+  <button class="btn next" onclick="go(4)">單元四 →</button>
+</div>
+</div>
+
+<!-- ========== 4. 螢光濕式磁軛法(Yoke) ========== -->
+<div class="sec" id="s4">
+<h1>單元四：螢光濕式磁軛法 (Yoke) 檢測<small>⏱️ 1 小時 ｜ CNS 11377 / 11378 / 11048</small></h1>
+
+<div class="cd p">
+  <div class="cd-t">🎯 目的</div>
+  <p>學習如何應用 CNS 11377、11378 或依據標準所做成之程序書，並根據<strong>螢光濕式磁軛法</strong>以執行工件檢測。此為<strong>初級模擬考試的主要考核方式</strong>。</p>
+</div>
+
+<h3>🔧 一、需用儀具與材料</h3>
+<table>
+  <tr><th>#</th><th>儀具</th><th>說明</th></tr>
+  <tr><td>1</td><td>上磁裝置</td><td>交流、直流或永久磁鐵磁軛</td></tr>
+  <tr><td>2</td><td>螢光濕式磁粒</td><td>Tiede 690.1、Magnaflux 14A（自行調配或壓力罐裝）</td></tr>
+  <tr><td>3</td><td>磁浴噴灑裝置</td><td>手動或循環泵浦注流式</td></tr>
+  <tr><td>4</td><td>白光照度計</td><td>查核環境照度</td></tr>
+  <tr><td>5</td><td>黑光強度計</td><td>J221 meter</td></tr>
+  <tr><td>6</td><td><strong>黑光燈</strong></td><td>UV-A 波長 3200～4000 Å</td></tr>
+  <tr><td>7</td><td>標準規塊</td><td>八角型磁場指示規塊</td></tr>
+  <tr><td>8</td><td>磁場強度計</td><td>高斯計</td></tr>
+</table>
+
+<h3>✅ 二、上磁機查核</h3>
+<p>同單元二：交流磁軛 ≥ <strong>4.5 kg</strong>、直流/永久磁軛 ≥ <strong>18.1 kg</strong>。</p>
+
+<h3>🔍 三、檢測系統查核</h3>
+<div class="cd w">
+  <div class="cd-t">⚠️ 螢光檢測環境要求（與色比不同！）</div>
+  <table>
+    <tr><th>項目</th><th>色比檢測（單元二）</th><th>螢光檢測（本單元）</th></tr>
+    <tr><td>環境亮度</td><td>≥ 500 lx（需足夠白光）</td><td><strong>≤ 20 lx</strong>（需暗室）</td></tr>
+    <tr><td>黑光燈強度</td><td>不需要</td><td><strong>≥ 800 μW/cm²</strong>（被檢物表面）</td></tr>
+    <tr><td>眼睛適應</td><td>不需要</td><td>在暗區（≤ 20 lx）至少 <strong>5 分鐘</strong></td></tr>
+    <tr><td>黑光燈查核時機</td><td>─</td><td>檢測前/後、每隔 8 小時或更換工作區域</td></tr>
+  </table>
+</div>
+
+<h3>⚡ 四、檢測程序</h3>
+<h4>4.1 磁化方式</h4>
+<p>同單元二：兩次分開檢測，第二次垂直於第一次。所有檢測區須有足夠重疊。</p>
+
+<h4>4.2 磁化程序：連續法</h4>
+<p>一般採用連續法 ─ 噴撒磁浴、檢視之全部過程均需導通電流。</p>
+
+<h4>4.3 檢測步驟（8 步）</h4>
+<ol class="st">
+  <li><strong>表面清理</strong> ─ 清除油脂、銲渣、鏽皮等。</li>
+  <li>將<strong>電磁軛放在試件上</strong>。</li>
+  <li><strong>啟動電源</strong>，施加磁化電流，上磁。</li>
+  <li><strong>噴灑磁浴</strong>於試件受磁化部位的表面上。</li>
+  <li><strong>黑光燈檢視</strong> ─ 在暗室中以黑光燈照射檢視螢光顯示。</li>
+  <li><strong>關閉磁軛電流</strong>。</li>
+  <li><strong>標示瑕疵</strong>。</li>
+  <li><strong>磁軛移至下一檢測位置</strong>，重複。旋轉 90° 進行第二方向。</li>
+</ol>
+
+<h3>👁️ 五、顯示評估</h3>
+<p>同單元二：磁化並噴灑磁粒後立即檢視評估。須注意真實瑕疵顯示與錯誤顯示之分辨。</p>
+
+<h3>📝 六、瑕疵記錄</h3>
+<p>同單元二：四種瑕疵類型（線形、圓形、群集形、裂縫）。記錄位置、尺度、數量及種類。</p>
+
+<h3>🔄 七、退磁處理</h3>
+<p>同單元二：交流電磁軛緩慢移開退磁，退磁後以磁場強度計量測剩磁。</p>
+
+<div class="nb">
+  <button class="btn prev" onclick="go(3)">← 單元三</button>
+  <button class="btn next" onclick="go(5)">單元五 →</button>
+</div>
+</div>
+
+<!-- ========== 5. 螢光濕式磁圈法(Coil) ========== -->
+<div class="sec" id="s5">
+<h1>單元五：螢光濕式磁圈法 (Coil) 檢測<small>⏱️ 1.5 小時 ｜ CNS 11377 / 11378 / 11048</small></h1>
+
+<div class="cd">
+  <div class="cd-t">🎯 目的</div>
+  <p>學習如何應用 CNS 11377、11378 或依據標準所做成之程序書，並根據<strong>螢光濕式磁圈法</strong>以執行工件檢測。</p>
+</div>
+
+<h3>🔧 一、需用儀具</h3>
+<p>同單元三（上磁機+線圈）加上單元四的螢光專用設備（黑光燈、黑光強度計、螢光磁浴）。</p>
+
+<h3>⚡ 二、使用上磁機、檢測系統查核</h3>
+<p>上磁機電流校正同單元三。檢測系統查核方面，結合<strong>單元三的線圈查核</strong>與<strong>單元四的螢光環境查核</strong>（暗室 ≤ 20 lx、黑光燈 ≥ 800 μW/cm²、眼睛適應 5 分鐘）。</p>
+
+<h3>📐 三、磁場強度計算</h3>
+<p>NI 安匝值計算<strong>完全同單元三</strong>：依 L/D 比使用公式①～④、中空工件用公式⑤、電流=安匝/圈數（公式⑥）。</p>
+
+<h3>🔍 四、檢測程序</h3>
+<p>磁化方式同單元三（線圈縱向磁化、兩次垂直方向、連續法），差異在於：</p>
+<div class="cd o">
+  <div class="cd-t">💡 與色比磁圈法的差異</div>
+  <p>✦ 使用<strong>螢光磁浴</strong>取代色比磁液<br>
+  ✦ 在<strong>暗室＋黑光燈</strong>下檢視，而非白光下<br>
+  ✦ 環境照度要求 <strong>≤ 20 lx</strong>（而非 ≥ 500 lx）<br>
+  ✦ 靈敏度更高，更容易發現微小瑕疵</p>
+</div>
+
+<h3>📝 五～七、顯示評估、瑕疵記錄、退磁處理</h3>
+<p>同前述單元。大型上磁機可直接利用退磁功能鍵退磁；交流電磁軛緩慢移開退磁。</p>
+
+<div class="nb">
+  <button class="btn prev" onclick="go(4)">← 單元四</button>
+  <button class="btn next" onclick="go(6)">單元六 →</button>
+</div>
+</div>
+
+<!-- ========== 6. 螢光濕式中心導體法 ========== -->
+<div class="sec" id="s6">
+<h1>單元六：螢光濕式中心導體法檢測<small>⏱️ 1 小時 ｜ CNS 11377 / 11378 / 11048</small></h1>
+
+<div class="cd">
+  <div class="cd-t">🎯 目的</div>
+  <p>學習如何應用 CNS 11377、11378 或依據標準所做成之程序書，並根據<strong>螢光濕式中心導體法</strong>以執行<strong>中空工件</strong>檢測。</p>
+</div>
+
+<h3>🔩 什麼是中心導體法？</h3>
+<div class="cd o">
+  <p>將一根<strong>導棒（銅或鋁合金）</strong>或電纜線穿過中空工件的孔洞，通電後在工件上產生<strong>周向磁場</strong>。此方法專門用於檢測中空、環形、管狀工件的<strong>軸向瑕疵</strong>。</p>
+</div>
+
+<div class="dg">
+  <svg viewBox="0 0 500 200" width="460">
+    <ellipse cx="250" cy="100" rx="120" ry="80" fill="#dfe6e9" stroke="#636e72" stroke-width="2"/>
+    <ellipse cx="250" cy="100" rx="40" ry="80" fill="#f5f7fa" stroke="#636e72" stroke-width="1.5"/>
+    <line x1="80" y1="100" x2="420" y2="100" stroke="#e67e22" stroke-width="4"/>
+    <circle cx="80" cy="100" r="6" fill="#e67e22"/><circle cx="420" cy="100" r="6" fill="#e67e22"/>
+    <text x="250" y="50" text-anchor="middle" font-size="12" fill="#636e72">中空工件（環形/管狀）</text>
+    <text x="250" y="120" text-anchor="middle" font-size="11" fill="#e67e22" font-weight="bold">中心導棒</text>
+    <path d="M290,30 C330,30 330,60 310,70" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#ar2)"/>
+    <path d="M210,170 C170,170 170,140 190,130" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#ar2)"/>
+    <text x="350" y="45" font-size="10" fill="#2980b9">周向磁場</text>
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2980b9"/></marker></defs>
+  </svg>
+  <div class="dg-cap">圖：中心導體法 ─ 導棒穿過中空工件產生周向磁場</div>
+</div>
+
+<h3>🔧 一、需用儀具</h3>
+<table>
+  <tr><th>#</th><th>儀具</th><th>說明</th></tr>
+  <tr><td>1</td><td>磁化機</td><td>Tiede GWH 15、GWH 60</td></tr>
+  <tr><td>2</td><td><strong>中心導棒</strong></td><td>銅或鋁合金材質</td></tr>
+  <tr><td>3</td><td>螢光濕式磁浴</td><td>Tiede 690.1、Magnaflux 14A</td></tr>
+  <tr><td>4</td><td>磁浴噴灑裝置</td><td>手動或循環泵浦注流式</td></tr>
+  <tr><td>5-9</td><td>白光照度計、黑光強度計、黑光燈、八角型規塊、磁場強度計</td><td>同單元四</td></tr>
+</table>
+
+<h3>📐 二、試件之準備</h3>
+<ol class="st">
+  <li>試件須為<strong>鐵磁性材料</strong>。</li>
+  <li>中空試件之檢測面必須<strong>乾燥與清潔</strong>，不可有會妨礙檢測之髒物、油脂、纖維、濺渣等。</li>
+  <li>若有表面不規則狀況會遮蓋瑕疵顯示時，須用研磨或其他機械加工方式先作表面處理。</li>
+  <li>試件之表面溫度<strong>不可超過 57°C</strong>。</li>
+</ol>
+
+<h3>⚡ 三、電流大小選定</h3>
+<table>
+  <tr><th>被檢物外徑</th><th>電流選定</th></tr>
+  <tr><td>小於 125 mm</td><td><strong>700～900 A</strong> / 每 25mm 外徑</td></tr>
+  <tr><td>125～250 mm</td><td><strong>500～700 A</strong> / 每 25mm 外徑</td></tr>
+</table>
+
+<h3>🔍 四、磁場強度與磁場方向之核對</h3>
+<ol class="st">
+  <li>在黑暗環境下數分鐘，先使<strong>眼睛適應</strong>。</li>
+  <li>將導棒或電纜線置於中空試件上，儘可能緊密接於磁化機之極板或接頭。</li>
+  <li>將磁場指示標準塊置於磁軛之兩磁極間，<strong>銅片面朝上</strong>。</li>
+  <li>噴灑磁浴於磁場指示標準塊上。</li>
+  <li>停止磁浴的噴灑，同時施加磁化電流。</li>
+  <li>停止磁化電流。</li>
+  <li>以黑光燈照射標準塊之銅片面，若與磁力線垂直方向有清晰顯示，即表示此磁場強度適用於檢測。</li>
+  <li>若標準塊之顯示不清則可稍微<strong>調高電流</strong>重新檢定。</li>
+</ol>
+
+<h3>🔬 五、試件之檢測</h3>
+<div class="cd w">
+  <div class="cd-t">⚠️ 重要！中心導體法的磁化方向限制</div>
+  <p>中心導體法<strong>僅能提供周向磁場</strong>，因此只能檢測出軸向瑕疵。需再以<strong>其它磁化方法</strong>（如磁軛法、線圈法）提供另一垂直方向之磁場，以確保檢測之完整性。</p>
+</div>
+<ol class="st">
+  <li>在黑暗環境下數分鐘，先使眼睛適應。</li>
+  <li>將導棒或電纜線置於中空試件上，緊密接於磁化機之極板或接頭。</li>
+  <li>噴灑磁浴於試件上，且必須能完全涵蓋待檢測區域之表面。</li>
+  <li>停止磁浴的噴灑，同時施加磁化電流。</li>
+  <li>停止磁化電流。</li>
+  <li>以黑光燈照射試件表面，<strong>檢視、判讀試件</strong>。</li>
+</ol>
+
+<h3>🔄 六、退磁處理</h3>
+<div class="cd">
+  <p>使用大型上磁機時，直接利用設備上的退磁功能鍵退磁。使用交流通電時，先將電流稍加升高通電停留約十秒，然後<strong>連序續緩降電流至零</strong>即可退磁。退磁後以磁場強度計量測剩磁。</p>
+</div>
+
+<div class="nb">
+  <button class="btn prev" onclick="go(5)">← 單元五</button>
+  <button class="btn next" onclick="go(7)">單元七 →</button>
+</div>
+</div>
+
+<!-- ========== 7. 色比乾式接觸棒法 ========== -->
+<div class="sec" id="s7">
+<h1>單元七：色比乾式接觸棒法檢測<small>⏱️ 1 小時 ｜ CNS 11377 / 11378 / 11048</small></h1>
+
+<div class="cd">
+  <div class="cd-t">🎯 目的</div>
+  <p>學習如何應用 CNS 11377、11378 或依據標準所做成之程序書，並根據<strong>色比乾式接觸棒法</strong>以檢測工件。</p>
+</div>
+
+<h3>🔧 一、需用儀具</h3>
+<table>
+  <tr><th>#</th><th>儀具</th><th>說明</th></tr>
+  <tr><td>1</td><td>磁化機</td><td>Tiede GWH 15、GWH 60</td></tr>
+  <tr><td>2</td><td><strong>電纜線及接觸棒 (Prod)</strong></td><td>兩根金屬觸棒，通電後在兩觸點間產生周向磁場</td></tr>
+  <tr><td>3</td><td>乾式磁粒</td><td>Magnaflux No.8A(紅)、3A(黑)、1(灰)</td></tr>
+  <tr><td>4</td><td>磁粒噴撒器</td><td>橡皮球</td></tr>
+  <tr><td>5</td><td>照度計</td><td>白光照度計</td></tr>
+  <tr><td>6</td><td>標準規塊</td><td>八角型磁場指示規塊</td></tr>
+  <tr><td>7</td><td>磁場強度計</td><td>高斯計</td></tr>
+</table>
+
+<h3>📐 二、試件之準備</h3>
+<ol class="st">
+  <li>試件須為<strong>鐵磁性材料</strong>。</li>
+  <li>檢測面必須乾燥與清潔。</li>
+  <li><strong>接觸點必需輪磨至金屬層</strong>以利電流導通壁免弧擊、火花。</li>
+  <li>試件之表面溫度<strong>不可超過 316°C</strong>（乾式磁粒溫度限制較高）。</li>
+</ol>
+
+<h3>⚡ 三、檢測程序</h3>
+<h4>3.1 電流大小選定</h4>
+<table>
+  <tr><th>被檢物厚度</th><th>電流選定</th></tr>
+  <tr><td>小於 19 mm</td><td><strong>100～125 A</strong> / 每 25mm 極棒間距</td></tr>
+  <tr><td>19 mm 以上</td><td><strong>90～110 A</strong> / 每 25mm 極棒間距</td></tr>
+</table>
+<p>電流種類可選擇<strong>交流 (AC) 或半波直流 (HWDC)</strong>，其中更以半波直流配合乾式磁粒對<strong>次表層瑕疵</strong>具有最高的檢出能力。</p>
+
+<h4>3.2 磁化方式</h4>
+<p>同前述：兩次分開檢測，第二次垂直於第一次。所有檢測區須有足夠重疊。</p>
+
+<h4>3.3 磁化程序：連續法</h4>
+<p>因雙手持接觸棒及開關，須<strong>另一人操作磁粒噴撒器</strong>及吹除過多磁粒並兼任判視之工作。</p>
+
+<h4>3.4 檢測步驟（9 步）</h4>
+<ol class="st">
+  <li><strong>表面清理</strong>，磨亮接觸點。</li>
+  <li>決定接觸棒<strong>間距</strong>、<strong>電流種類</strong>(AC/HWDC)及<strong>電流大小</strong>(A)。</li>
+  <li>接觸棒稍加壓力<strong>穩穩接觸被檢物</strong>。</li>
+  <li><strong>啟動電源</strong>，施加磁化電流，上磁。</li>
+  <li>檢視電流表看實際電流是否足夠，否則需加調整。</li>
+  <li><strong>噴灑磁粒</strong>於試件受磁化部位的表面上。</li>
+  <li><strong>清除試件上過量的磁粒</strong>（輕吹）。</li>
+  <li><strong>白光下檢視</strong>。</li>
+  <li><strong>關閉電流</strong>，接觸棒移至下一檢測位置。</li>
+</ol>
+
+<h3>🔄 四、退磁處理</h3>
+<div class="cd g">
+  <div class="cd-t">✅ 接觸棒法特殊規定</div>
+  <p>接觸棒法<strong>一般不需退磁</strong>。</p>
+</div>
+
+<h3>📝 五、顯示評估與瑕疵記錄</h3>
+<p>同前述單元：四種瑕疵類型、注意真實瑕疵與錯誤顯示之分辨。</p>
+
+<div class="cd" style="text-align:center;padding:28px;margin-top:28px;background:linear-gradient(135deg,#1b4965,#2e86ab);color:#fff;border-left:none;border-radius:14px">
+  <h2 style="margin-bottom:8px">全部七個單元完成！</h2>
+  <p style="font-size:14px;opacity:.85">恭喜完成磁粒檢測初級實作訓練教材的全部內容。<br>接下來請進行實際操作練習。</p>
+  <p style="font-size:12px;margin-top:14px;opacity:.6">參考：CNS 11048、CNS 11377、CNS 11378 ｜ Magnaflux MT Process Guide</p>
+</div>
+
+<div class="nb">
+  <button class="btn prev" onclick="go(6)">← 單元六</button>
+  <button class="btn next" onclick="go(0)">回到課程總覽 ↺</button>
+</div>
+</div>
+
+</main>
+
+<script>
+const secs=document.querySelectorAll('.sec'),navs=document.querySelectorAll('.nav a'),pf=document.getElementById('pf'),pt=document.getElementById('pt'),tot=secs.length-1;
+function go(i){
+  secs.forEach(s=>s.classList.remove('act'));navs.forEach(a=>a.classList.remove('act'));
+  secs[i].classList.add('act');navs[i].classList.add('act');
+  window.scrollTo({top:0,behavior:'smooth'});
+  const p=i===0?0:Math.round(i/tot*100);
+  pf.style.width=p+'%';pt.textContent='進度 '+i+' / '+tot;
+  document.querySelector('.sb').classList.remove('open');
+}
+navs.forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(+a.dataset.s)}));
+</script>
+</body>
+</html>
